@@ -1,14 +1,15 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Image,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface SidebarProps {
@@ -20,6 +21,7 @@ const { width: screenWidth } = Dimensions.get('window');
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const slideAnimation = React.useRef(new Animated.Value(-screenWidth)).current;
+  const [userFullName, setUserFullName] = useState('User');
 
   React.useEffect(() => {
     if (isOpen) {
@@ -28,6 +30,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         duration: 300,
         useNativeDriver: true,
       }).start();
+      loadUserName();
     } else {
       Animated.timing(slideAnimation, {
         toValue: -screenWidth,
@@ -36,6 +39,17 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       }).start();
     }
   }, [isOpen]);
+
+  const loadUserName = async () => {
+    try {
+      const name = await AsyncStorage.getItem('userFullName');
+      if (name) {
+        setUserFullName(name);
+      }
+    } catch (error) {
+      console.error('Error loading user name:', error);
+    }
+  };
 
   const handleNavigation = (screen: string) => {
     onClose();
@@ -121,7 +135,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* User Info and Sign Out */}
           <View style={styles.userSection}>
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>Kevin T. Mannathoko</Text>
+              <Text style={styles.userName}>{userFullName}</Text>
               <Text style={styles.userRole}>Security Officer</Text>
             </View>
             <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>

@@ -1,6 +1,7 @@
 import Sidebar from '@/components/sidebar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Image,
     SafeAreaView,
@@ -15,6 +16,22 @@ import {
 export default function DashboardScreen() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userFullName, setUserFullName] = useState('User');
+
+  useEffect(() => {
+    loadUserName();
+  }, []);
+
+  const loadUserName = async () => {
+    try {
+      const name = await AsyncStorage.getItem('userFullName');
+      if (name) {
+        setUserFullName(name);
+      }
+    } catch (error) {
+      console.error('Error loading user name:', error);
+    }
+  };
 
   const handleSignOut = () => {
     router.replace('/login');
@@ -55,7 +72,7 @@ export default function DashboardScreen() {
         {/* User Greeting */}
         <View style={styles.greetingSection}>
           <Text style={styles.greeting}>Welcome back,</Text>
-          <Text style={styles.userName}>Kevin T. Mannathoko</Text>
+          <Text style={styles.userName}>{userFullName}</Text>
         </View>
 
         {/* Search Bar */}
